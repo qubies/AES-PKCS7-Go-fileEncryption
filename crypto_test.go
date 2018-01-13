@@ -49,5 +49,16 @@ func TestPadding(t *testing.T) {
 }
 
 func TestCrypto(t *testing.T) {
-	t.Error("Not Yet Implemented")
+	key := []byte("secretkeylength1")
+	iv := []byte("1234123412341234")
+
+	err := encryptFile("input", "crypted", key, iv)
+	if err != nil {
+		t.Errorf("encryptionError: %s", err)
+	}
+
+	err = decryptFile("crypted", "output", key)
+	if err != nil {
+		t.Errorf("decryptionError: %s", err)
+	}
 }
