@@ -2,9 +2,9 @@ package crypto
 
 import (
 	"bytes"
-	//"compress/gzip"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
 	"errors"
 	"io"
 	"os"
@@ -41,8 +41,14 @@ func unpad(input *[]byte) error {
 	*input = (*input)[:(iLen - padded)]
 	return nil
 }
+func randomBytes(len int) ([]byte, error) {
+	ret := make([]byte, len)
+	_, err := rand.Read(ret)
+	return ret, err
+}
 
 //modified from https://talks.golang.org/2010/io/decrypt.go
+//appends the IV to the end of the file for decryption
 func encryptFile(srcfile, dstfile string, key, iv []byte) error {
 	// open the source
 	r, err := os.Open(srcfile)

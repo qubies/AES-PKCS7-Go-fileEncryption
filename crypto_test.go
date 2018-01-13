@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"bytes"
+	"crypto/aes"
 	"testing"
 )
 
@@ -50,9 +51,12 @@ func TestPadding(t *testing.T) {
 
 func TestCrypto(t *testing.T) {
 	key := []byte("secretkeylength1")
-	iv := []byte("1234123412341234")
+	iv, err := randomBytes(aes.BlockSize)
+	if err != nil {
+		t.Errorf("encryptionError: %s", err)
+	}
 
-	err := encryptFile("input", "crypted", key, iv)
+	err = encryptFile("input", "crypted", key, iv)
 	if err != nil {
 		t.Errorf("encryptionError: %s", err)
 	}
