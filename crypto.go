@@ -5,12 +5,13 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"errors"
 	"io"
 	"os"
 )
 
-func pad(blockSize int, input *[]byte) error {
+func Pad(blockSize int, input *[]byte) error {
 	//the padding is the length of padding added
 	iLen := len(*input)
 	//so the blocksize - the leftover is the amount we have to add
@@ -23,7 +24,7 @@ func pad(blockSize int, input *[]byte) error {
 	return nil
 }
 
-func unpad(input *[]byte) error {
+func Unpad(input *[]byte) error {
 	iLen := len(*input)
 	//empty.. no good
 	if iLen < 1 {
@@ -41,15 +42,32 @@ func unpad(input *[]byte) error {
 	*input = (*input)[:(iLen - padded)]
 	return nil
 }
-func randomBytes(len int) ([]byte, error) {
+func RandomBytes(len int) ([]byte, error) {
 	ret := make([]byte, len)
 	_, err := rand.Read(ret)
 	return ret, err
 }
 
+func Sha256FileSum(srcfile string) ([]byte, error) {
+	var ret []byte
+	f, err := os.Open(srcfile)
+	if err != nil {
+		return ret, err
+	}
+	defer f.Close()
+
+	h := sha256.New()
+
+	if _, err := io.Copy(h, f); err != nil {
+		return ret, err
+	}
+	ret = h.Sum(nil)
+	return ret, nil
+}
+
 //modified from https://talks.golang.org/2010/io/decrypt.go
 //appends the IV to the end of the file for decryption
-func encryptFile(srcfile, dstfile string, key, iv []byte) error {
+func EncryptFile(srcfile, dstfile string, key, iv []byte) error {
 	// open the source
 	r, err := os.Open(srcfile)
 	if err != nil {
@@ -76,7 +94,7 @@ func encryptFile(srcfile, dstfile string, key, iv []byte) error {
 }
 
 //modified from https://talks.golang.org/2010/io/decrypt.go
-func decryptFile(srcfile, dstfile string, key []byte) error {
+func DecryptFile(srcfile, dstfile string, key []byte) error {
 	f, err := os.Open(srcfile)
 	if err != nil {
 		return err
