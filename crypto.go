@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
 )
@@ -21,6 +22,22 @@ func pad(blockSize int, input *[]byte) error {
 	*input = append(*input, padding...)
 	return nil
 }
+
+func unpad(input *[]byte) error {
+	iLen := len(*input)
+	if iLen < 1 {
+		return errors.New("Unpad called on zero length byte array")
+	}
+	padded := int((*input)[iLen-1])
+	for x := 1; x <= padded && x <= iLen; x++ {
+		if int((*input)[iLen-x]) != padded {
+			return errors.New("Invalid Padding Char Found")
+		}
+	}
+	*input = (*input)[:(iLen - padded)]
+	return nil
+}
+
 func encrypt(key, plain []byte) {
 	key = []byte("example key 1234")
 	plain = []byte("exampleplaintext")

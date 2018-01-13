@@ -23,6 +23,15 @@ func TestPadding(t *testing.T) {
 		t.Errorf("Byte Length Incorrect on Tricky Pad\nString:%s\nHex:%x", thingToPad, thingToPad)
 
 	}
+	err := unpad(&thingToPad)
+	if err != nil {
+		t.Errorf("Unpad on Inital Returned Error %s", err)
+	}
+
+	err = unpad(&trickyPad)
+	if err != nil {
+		t.Errorf("Unpad on Tricky Returned Error %s", err)
+	}
 	if !bytes.Equal(trickyPad, initialTricky) {
 		t.Errorf("Unpad Failed on Tricky Pad\nString:%s\nHex:%x", trickyPad, trickyPad)
 	}
