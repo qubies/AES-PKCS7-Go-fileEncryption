@@ -40,6 +40,11 @@ func TestPadding(t *testing.T) {
 		t.Errorf("Unpad Failed on Inital Pad Pad\nString:%s\nHex:%x", thingToPad, thingToPad)
 
 	}
+	niler := []byte(nil)
+	err = unpad(&niler)
+	if err == nil {
+		t.Error("unpad did not error on nil input")
+	}
 
 }
 
