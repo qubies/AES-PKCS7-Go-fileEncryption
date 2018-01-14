@@ -1,3 +1,8 @@
+/* Package crypto provices simple go cryptography functions
+ * Created Jan 13, 2018
+ * By: Tobias Renwick (qubies)
+ */
+
 package crypto
 
 import (
@@ -12,6 +17,8 @@ import (
 	"os"
 )
 
+// Pad applies PKCS7 padding in place to a byte array.
+// Padding is necessary to ensure plain text input is divisible by the encryption block size.
 func Pad(blockSize int, input *[]byte) error {
 	//the padding is the length of padding added
 	iLen := len(*input)
@@ -25,6 +32,7 @@ func Pad(blockSize int, input *[]byte) error {
 	return nil
 }
 
+// Unpad removes PKCS7 padding from byte array in place.
 func Unpad(input *[]byte) error {
 	iLen := len(*input)
 	//empty.. no good
@@ -43,12 +51,15 @@ func Unpad(input *[]byte) error {
 	*input = (*input)[:(iLen - padded)]
 	return nil
 }
+
+// RandomBytes returns a byte array of len of cryptographically secure random bytes.
 func RandomBytes(len int) ([]byte, error) {
 	ret := make([]byte, len)
 	_, err := rand.Read(ret)
 	return ret, err
 }
 
+// Sha256FileSum returns the sha256 digest of a file as a byte array.
 func Sha256FileSum(srcfile string) ([]byte, error) {
 	var ret []byte
 	f, err := os.Open(srcfile)
@@ -66,10 +77,15 @@ func Sha256FileSum(srcfile string) ([]byte, error) {
 	return ret, nil
 }
 
-//modified from https://talks.golang.org/2010/io/decrypt.go
-//appends the IV to the end of the file for decryption
-func EncryptFile(srcfile, dstfile string, key, iv []byte) error {
+// Encrypt file will create an encrypted copy of srcfile at dstfile.
+// appends the IV to the end of the file for decryption
+// modified from https://talks.golang.org/2010/io/decrypt.go
+func EncryptFile(srcfile, dstfile string, key []byte) error {
 	// open the source
+	iv, err := RandomBytes(aes.BlockSize)
+	if err != nil {
+		return err
+	}
 	r, err := os.Open(srcfile)
 	if err != nil {
 		return err

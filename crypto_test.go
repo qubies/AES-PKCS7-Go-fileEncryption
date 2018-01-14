@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"bytes"
-	"crypto/aes"
 	"fmt"
 	"os"
 	"testing"
@@ -58,12 +57,8 @@ func TestCrypto(t *testing.T) {
 	}
 	w.Write([]byte("crypt me"))
 	key := []byte("secretkeylength1")
-	iv, err := RandomBytes(aes.BlockSize)
-	if err != nil {
-		t.Errorf("encryptionError: %s", err)
-	}
 
-	err = EncryptFile("input", "crypted", key, iv)
+	err = EncryptFile("input", "crypted", key)
 	if err != nil {
 		t.Errorf("encryptionError: %s", err)
 	}
