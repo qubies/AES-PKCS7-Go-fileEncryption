@@ -78,7 +78,9 @@ func Sha256FileSum(srcfile string) ([]byte, error) {
 }
 
 // Encrypt file will create an encrypted copy of srcfile at dstfile.
-// appends the IV to the end of the file for decryption
+// appends a randomized IV to the end of the file for decryption.
+// use of EncryptFile should be combined with a hash for verification.
+// Key length must be 16 bytes
 // modified from https://talks.golang.org/2010/io/decrypt.go
 func EncryptFile(srcfile, dstfile string, key []byte) error {
 	// open the source
@@ -110,7 +112,9 @@ func EncryptFile(srcfile, dstfile string, key []byte) error {
 	return err
 }
 
-//modified from https://talks.golang.org/2010/io/decrypt.go
+// DecryptFile decrypts srcfile into dstfile using key.
+// keylength must be 16 bytes.
+// modified from https://talks.golang.org/2010/io/decrypt.go
 func DecryptFile(srcfile, dstfile string, key []byte) error {
 	f, err := os.Open(srcfile)
 	if err != nil {
@@ -140,7 +144,10 @@ func DecryptFile(srcfile, dstfile string, key []byte) error {
 	return err
 }
 
-//returns plaintext on error. check your errors.
+// EncryptString takes a byte array and a 16 byte key to return an encrypted byte array.
+// The resultant byte array is actually:
+// 	IV + HMAC + Ciphertext
+// WARNING: EncryptString may return plaintext on error. Check your errors.
 func EncryptString(key, plain []byte) ([]byte, error) {
 
 	err := Pad(aes.BlockSize, &plain)
@@ -176,7 +183,8 @@ func EncryptString(key, plain []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
-// decrypts a string
+// DecryptString takes a key and ciphertext generated from Encrypt string and returns just the
+// plain text.
 func DecryptString(key, ciphertext []byte) ([]byte, error) {
 
 	block, err := aes.NewCipher(key)
