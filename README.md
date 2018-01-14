@@ -1,10 +1,11 @@
-# Package crypto
+# Package simpleCrypto
 This package contains some simple crypto examples and functions written in go. 
 I have made attempts to ensure thier correctness, however use at your own risk.
 
-## INSTALLATION
-go get github.com/qubies/AES-PKCS7-Go-fileEncryption
-### PACKAGE DOCUMENTATION
+# INSTALLATION
+	go get github.com/qubies/AES-PKCS7-Go-fileEncryption
+
+## PACKAGE DOCUMENTATION
 
 #### package simpleCrypto
     import "github.com/qubies/AES-PKCS7-Go-fileEncryption/simpleCrypto"
