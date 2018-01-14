@@ -83,4 +83,21 @@ func TestCrypto(t *testing.T) {
 	}
 	fmt.Printf(" Input Hash: %x\n", inputHash)
 	fmt.Printf("Output Hash: %x\n", outputHash)
+
+	cryString, err := EncryptString(key, []byte("Hello There"))
+	if err != nil {
+		t.Errorf("Error in String Encryption: %s", err)
+	}
+	decString, err := DecryptString(key, cryString)
+	if err != nil {
+		t.Errorf("Decryption Error: %s", err)
+	}
+	Unpad(&decString)
+	if bytes.Compare(decString, []byte("Hello There")) != 0 {
+		fmt.Printf("Decrypted String:%s\n", decString)
+		fmt.Printf(" Expected String:%s\n", []byte("Hello There"))
+		fmt.Printf("Decrypted String:%x\n", decString)
+		fmt.Printf(" Expected String:%x\n", []byte("Hello There"))
+		t.Error("Initial and final Strings do not match")
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
@@ -123,9 +124,10 @@ func DecryptFile(srcfile, dstfile string, key []byte) error {
 	return err
 }
 
-/*func encrypt(key, plain []byte) ([]byte, error) {
+//returns plaintext on error. check your errors.
+func EncryptString(key, plain []byte) ([]byte, error) {
 
-	err := pad(aes.BlockSize, plain)
+	err := Pad(aes.BlockSize, &plain)
 	if err != nil {
 		return plain, err
 	}
@@ -136,23 +138,58 @@ func DecryptFile(srcfile, dstfile string, key []byte) error {
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return plain, err
 	}
 
-	// The IV needs to be unique, but not secure. Therefore it's common to
-	// include it at the beginning of the ciphertext.
-	ciphertext := make([]byte, aes.BlockSize+len(plain))
+	//the finished ciphertext is actually
+	// IV + SHA256mac + ciphertext
+	ciphertext := make([]byte, aes.BlockSize+len(plain)+sha256.Size)
 	iv := ciphertext[:aes.BlockSize]
+	mac := ciphertext[aes.BlockSize : aes.BlockSize+sha256.Size]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		panic(err)
 	}
+	rawMac := hmac.New(sha256.New, key)
+	rawMac.Write(plain)
+	copy(mac, rawMac.Sum(nil))
 
 	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(ciphertext[aes.BlockSize:], plain)
 
-	// It's important to remember that ciphertexts must be authenticated
-	// (i.e. by using crypto/hmac) as well as being encrypted in order to
-	// be secure.
+	mode.CryptBlocks(ciphertext[aes.BlockSize+sha256.Size:], plain)
 
-	fmt.Printf("%x\n", ciphertext)
-}*/
+	return ciphertext, nil
+}
+
+// decrypts a string
+func DecryptString(key, ciphertext []byte) ([]byte, error) {
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return ciphertext, errors.New("unable to create cipher")
+	}
+
+	if len(ciphertext) < aes.BlockSize {
+		return ciphertext, errors.New("ciphertext too short")
+	}
+	iv := ciphertext[:aes.BlockSize]
+	mac := ciphertext[aes.BlockSize : aes.BlockSize+sha256.Size]
+	ciphertext = ciphertext[aes.BlockSize+sha256.Size:]
+
+	// CBC mode always works in whole blocks.
+	if len(ciphertext)%aes.BlockSize != 0 {
+		return ciphertext, errors.New("ciphertext broken or corrupted")
+	}
+
+	mode := cipher.NewCBCDecrypter(block, iv)
+
+	// CryptBlocks can work in-place if the two arguments are the same.
+	mode.CryptBlocks(ciphertext, ciphertext)
+
+	rawMac := hmac.New(sha256.New, key)
+	rawMac.Write(ciphertext)
+	if !hmac.Equal(rawMac.Sum(nil), mac) {
+		return ciphertext, errors.New("HMAC Failure, Message Corrupted")
+	}
+
+	return ciphertext, nil
+}
