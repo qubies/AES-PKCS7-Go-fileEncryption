@@ -3,7 +3,7 @@
  * By: Tobias Renwick (qubies)
  */
 
-package crypto
+package simpleCrypto
 
 import (
 	"bytes"
