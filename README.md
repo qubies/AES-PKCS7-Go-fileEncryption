@@ -3,12 +3,12 @@ This package contains some simple crypto examples and functions written in go.
 I have made attempts to ensure thier correctness, however use at your own risk.
 
 # INSTALLATION
-	go get github.com/qubies/AES-PKCS7-Go-fileEncryption
+    go get github.com/qubies/simpleCrypto
 
 ## PACKAGE DOCUMENTATION
 
 #### package simpleCrypto
-    import "github.com/qubies/AES-PKCS7-Go-fileEncryption/simpleCrypto"
+    import "github.com/qubies/simpleCrypto"
 
 
 ## FUNCTIONS
