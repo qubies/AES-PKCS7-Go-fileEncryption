@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -51,6 +52,11 @@ func TestPadding(t *testing.T) {
 }
 
 func TestCrypto(t *testing.T) {
+	w, err := os.Create("input")
+	if err != nil {
+		t.Errorf("File Creation Error: %s", err)
+	}
+	w.Write([]byte("crypt me"))
 	key := []byte("secretkeylength1")
 	iv, err := RandomBytes(aes.BlockSize)
 	if err != nil {
