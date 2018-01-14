@@ -13,6 +13,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"io"
 	"os"
 )
@@ -216,4 +217,17 @@ func DecryptString(key, ciphertext []byte) ([]byte, error) {
 	}
 
 	return ciphertext, nil
+}
+
+// HashPassword generates a bcrypt hash of the password using work factor 14.
+func HashPassword(password string) ([]byte, error) {
+	bArr := []byte(password)
+	return bcrypt.GenerateFromPassword(bArr, 14)
+}
+
+// CheckPassword securely compares a bcrypt hashed password with its possible
+// plaintext equivalent.  Returns nil on success, or an error on failure.
+func CheckPasswordHash(password string, hash []byte) error {
+	bArr := []byte(password)
+	return bcrypt.CompareHashAndPassword(hash, bArr)
 }

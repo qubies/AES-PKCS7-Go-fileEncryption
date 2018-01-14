@@ -139,3 +139,15 @@ func TestCrypto(t *testing.T) {
 		t.Error("Initial and final Strings do not match")
 	}
 }
+
+func TestPassword(t *testing.T) {
+	userPass := "passw0rd"
+	hash, err := HashPassword(userPass)
+	if err != nil {
+		t.Errorf("BCrypt Error: %s", err)
+	}
+	err = CheckPasswordHash(userPass, hash)
+	if err != nil {
+		t.Errorf("Unable to Verify Hash: %s", err)
+	}
+}
